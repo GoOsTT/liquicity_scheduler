@@ -129,22 +129,23 @@ const App = () => {
         </div>
       ))}
 
-      <div className="flex flex-col gap-4 mt-4 w-100">
-        <Button
-          onClick={clearSelectedEvents}
-          variant="secondary"
-          disabled={selectedEvents.length === 0}
-          className="cursor-pointer bg-[#1e103f] text-white hover:bg-[#2a1659]"
-        >
-          Clear All Selections
-        </Button>
-        <Button
-          onClick={handleDownloadAll}
-          className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-300 font-bold"
-        >
-          Download Schedule (.ics)
-        </Button>
-      </div>
+
+<div className="flex flex-col gap-4 mt-4 w-full max-w-md mx-auto">
+    <Button
+      onClick={clearSelectedEvents}
+      variant="secondary"
+      disabled={selectedEvents.length === 0}
+      className="cursor-pointer bg-[#1e103f] text-white hover:bg-[#2a1659] w-full"
+    >
+      Clear All Selections
+    </Button>
+    <Button
+      onClick={handleDownloadAll}
+      className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-300 font-bold w-full"
+    >
+      Download Schedule (.ics)
+    </Button>
+  </div>
 
       <Alert handleAlertClose={setAlert} alertState={alert} />
       <a href="https://www.buymeacoffee.com/goost" target="_blank">

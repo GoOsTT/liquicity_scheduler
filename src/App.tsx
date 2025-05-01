@@ -32,11 +32,11 @@ const App = () => {
   }, []);
 
   const isSelected = (artist: Artist) =>
-    selectedEvents.some((e) => e.name === artist.name);
+    selectedEvents.some((e) => e.id === artist.id);
 
   const toggleArtist = (artist: Artist) => {
     if (isSelected(artist)) {
-      setSelectedEvents((prev) => prev.filter((e) => e.name !== artist.name));
+      setSelectedEvents((prev) => prev.filter((e) => e.id !== artist.id));
     } else {
       setSelectedEvents((prev) => [...prev, artist]);
     }
@@ -87,7 +87,7 @@ const App = () => {
           <h2 className="text-xl font-semibold mb-2 text-[#ffd700]">{day}</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {['Galaxy', 'Sonar', 'Lunar'].map((stage, stageIndex) => (
+            {['Galaxy', 'Solar', 'Lunar'].map((stage, stageIndex) => (
               <div key={stageIndex}>
                 <Collapsible>
                   <CollapsibleTrigger className="bg-[#1e103f] text-[#ffd700] p-2 rounded-md w-full text-center hover:bg-[#2a1659] font-semibold">
@@ -152,6 +152,7 @@ const App = () => {
         <img className='w-50 mt-8' src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee"  />
         </a>
     </div>
+
   );
 };
 

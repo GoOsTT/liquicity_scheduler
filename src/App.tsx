@@ -21,13 +21,19 @@ const App = () => {
 
   const sortedArtistsByDay = useMemo(() => {
     const sorted: typeof artistsByDay = {};
-    for (const [day, artists] of Object.entries(artistsByDay)) {
-      sorted[day] = [...artists].sort((a, b) => {
-        const aTime = new Date(...a.startTime).getTime();
-        const bTime = new Date(...b.startTime).getTime();
-        return aTime - bTime;
-      });
+  
+    for (const [day, stages] of Object.entries(artistsByDay)) {
+      sorted[day] = {};
+  
+      for (const [stage, artists] of Object.entries(stages)) {
+        sorted[day][stage] = [...artists].sort((a, b) => {
+          const aTime = new Date(...a.startTime).getTime();
+          const bTime = new Date(...b.startTime).getTime();
+          return aTime - bTime;
+        });
+      }
     }
+  
     return sorted;
   }, []);
 
@@ -80,80 +86,104 @@ const App = () => {
 
   return (
     <div className="p-6 font-sans min-h-screen bg-[#0a0a0f] text-[#f5f5f5]">
-      <h1 className="text-2xl font-bold mb-4 text-yellow-400">Liquicity 2025 Lineup Scheduler</h1>
-
+      <h1 className="text-2xl font-bold mb-6 text-yellow-400 text-center">
+        Liquicity 2025 Lineup Scheduler
+      </h1>
+  
       {Object.entries(sortedArtistsByDay).map(([day, artists]) => (
-        <div key={day} className="mb-6">
-          <h2 className="text-xl font-semibold mb-2 text-[#ffd700]">{day}</h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {['Galaxy', 'Solar', 'Lunar'].map((stage, stageIndex) => (
-              <div key={stageIndex}>
-                <Collapsible>
-                  <CollapsibleTrigger className="bg-[#1e103f] text-[#ffd700] p-2 rounded-md w-full text-center hover:bg-[#2a1659] font-semibold">
-                    {stage}
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <ul className="space-y-2 mt-4">
-                      {artists
-                        .filter((_, index) => index % 3 === stageIndex)
-                        .map((artist, index) => {
-                          const selected = isSelected(artist);
-                          return (
-                            <li
-                              key={index}
-                              className={`border rounded-lg p-3 flex justify-between items-center ${
-                                selected
-                                  ? 'bg-[#5c2e91] border-yellow-400 text-white'
-                                  : 'bg-[#16131f] hover:bg-[#221b35] border-[#3e2b69]'
-                              } cursor-pointer`}
-                              onClick={() => toggleArtist(artist)}
-                            >
-                              <span>
-                                {artist.name} - {artist.startTime[3]}:{artist.startTime[4].toString().padStart(2, '0')}
-                              </span>
-                              <span className={selected ? 'text-yellow-300' : 'text-[#ffd700]'}>
-                                <Button className={selected ? 'bg-yellow-400 text-black' : 'bg-[#5c2e91] text-white hover:bg-[#7035aa]'}>
+        <div key={day} className="mb-10">
+          <h2 className="text-xl font-semibold mb-4 text-[#ffd700]">{day}</h2>
+  
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {['Galaxy', 'Solar', 'Lunar'].map((stage) => {
+              const stageArtists = artists[stage]
+                .filter((artist: Artist) => artist.stage === stage)
+                .sort((a, b) => {
+                  const aTime = a.startTime[3] * 60 + a.startTime[4];
+                  const bTime = b.startTime[3] * 60 + b.startTime[4];
+                  return aTime - bTime;
+                });
+  
+              return (
+                <div key={stage}>
+                  <Collapsible>
+                    <CollapsibleTrigger className="bg-[#1e103f] text-[#ffd700] p-3 rounded-md w-full text-center hover:bg-[#2a1659] font-semibold">
+                      {stage}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      {stageArtists.length > 0 ? (
+                        <ul className="space-y-3 mt-4">
+                          {stageArtists.map((artist: Artist, index: number) => {
+                            const selected = isSelected(artist);
+                            return (
+                              <li
+                                key={index}
+                                className={`border rounded-lg p-4 flex justify-between items-center transition-colors duration-200 ${
+                                  selected
+                                    ? 'bg-[#5c2e91] border-yellow-400 text-white'
+                                    : 'bg-[#16131f] hover:bg-[#221b35] border-[#3e2b69]'
+                                } cursor-pointer`}
+                                onClick={() => toggleArtist(artist)}
+                              >
+                                <span>
+                                  <strong>{artist.name}</strong> — {artist.startTime[3]}:
+                                  {artist.startTime[4].toString().padStart(2, '0')}
+                                </span>
+                                <Button
+                                  className={`ml-4 ${
+                                    selected
+                                      ? 'bg-yellow-400 text-black'
+                                      : 'bg-[#5c2e91] text-white hover:bg-[#7035aa]'
+                                  }`}
+                                >
                                   {selected ? 'Added (click to remove)' : 'Add'}
                                 </Button>
-                              </span>
-                            </li>
-                          );
-                        })}
-                    </ul>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            ))}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : (
+                        <p className="mt-4 text-sm text-gray-400 italic">No artists on this stage</p>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}
-
-
-<div className="flex flex-col gap-4 mt-4 w-full max-w-md mx-auto">
-    <Button
-      onClick={clearSelectedEvents}
-      variant="secondary"
-      disabled={selectedEvents.length === 0}
-      className="cursor-pointer bg-[#1e103f] text-white hover:bg-[#2a1659] w-full"
-    >
-      Clear All Selections
-    </Button>
-    <Button
-      onClick={handleDownloadAll}
-      className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-300 font-bold w-full"
-    >
-      Download Schedule (.ics)
-    </Button>
-  </div>
-
+  
+      <div className="flex flex-col gap-4 mt-10 w-full max-w-md mx-auto">
+        <Button
+          onClick={clearSelectedEvents}
+          variant="secondary"
+          disabled={selectedEvents.length === 0}
+          className="bg-[#1e103f] text-white hover:bg-[#2a1659] w-full"
+        >
+          Clear All Selections
+        </Button>
+        <Button
+          onClick={handleDownloadAll}
+          className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-300 font-bold w-full"
+        >
+          Download Schedule (.ics)
+        </Button>
+      </div>
+  
       <Alert handleAlertClose={setAlert} alertState={alert} />
-      <a href="https://www.buymeacoffee.com/goost" target="_blank">
-        <img className='w-50 mt-8' src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee"  />
+  
+      <div className="mt-10 flex justify-center">
+        <a href="https://www.buymeacoffee.com/goost" target="_blank" rel="noopener noreferrer">
+          <img
+            className="w-48 hover:opacity-80 transition-opacity"
+            src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+            alt="Buy Me A Coffee"
+          />
         </a>
+      </div>
     </div>
-
   );
-};
+          }
 
 export default App;
